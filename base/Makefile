@@ -2,6 +2,7 @@ SUBDIR =  \
 		  component\
 		  net\
 		  process\
+		  db\
 
 all: targets
 

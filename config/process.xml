@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <allDB dblist="userdb gamedb">
+        <mysql connectId="userdb_read" dbName="userdb" host="127.0.0.1" userName="centos" pwd="centos" port="3306"/>
+        <mysql connectId="gamedb_read" dbName="gamedb" host="127.0.0.1" userName="centos" pwd="centos" port="3306"/>
+        <mysql connectId="logindb_read" dbName="logindb" host="127.0.0.1" userName="centos" pwd="centos" port="3306"/>
+    </allDB>
+
+    <allProcesses typeList="login router gateway func dbcached hallmanager hall gamemanager game">
+        <!--login，登录服务器，所有服务器共用即可，改为web服务器更容易，可以使用ngix代理-->
+        <!--center，中心服务器，所有服务器共用即可，负责下发和接受上报消息，提供http接口恭后台操作和查询-->
+
+        <!--route，内网消息转发，目前支持一个路由，要改为支持多个，...-->
+        <processType name="router">
+            <process num="1">
+                <private listen="127.0.0.1:9000" connectProcess=""/>
+            </process>
+        </processType>
+
+        <!--网关，只负客户端责连接管理以及很少的逻辑，可扩展多个-->
+        <processType name="gateway">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <public  listen="0.0.0.0:6100"/>
+            </process>
+        </processType>
+
+        <!--func，独立功能，好友帮会排名等牵扯到全世界玩家的模块，只能有一个，可以重启，重启后可以从manager中获取在线数据-->
+        <processType name="func">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+            </process>
+        </processType>
+
+        <!--数据库服，只用来备份数据，可扩展多个-->
+        <processType name="dbcached">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <dbwrite name="gamedb"/>
+            </process>
+        </processType>
+
+        <!--manager，大厅或者场景管理器，只需要一个即可，可以考虑将内存数据做一个实时的缓存用于该进程重启后恢复数据-->
+        <processType name="manager">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <dbread name="gamedb"/>
+            </process>
+        </processType>
+
+        <!--各类游戏服务器或者场景服务器-->
+        <processType name="game">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+            </process>
+        </processType>
+
+    </allProcesses>
+</root>
+

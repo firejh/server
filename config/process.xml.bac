@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <allDB dblist="userdb gamedb">
+        <mysql connectId="userdb_read" dbName="userdb" host="127.0.0.1" userName="centos" pwd="centos" port="3306"/>
+        <mysql connectId="gamedb_read" dbName="gamedb" host="127.0.0.1" userName="centos" pwd="centos" port="3306"/>
+        <mysql connectId="logindb_read" dbName="logindb" host="127.0.0.1" userName="centos" pwd="centos" port="3306"/>
+    </allDB>
+
+    <allProcesses typeList="login router gateway func dbcached hallmanager hall gamemanager game">
+        <!--login，登录服务器，可以部署多台-->
+        <processType name="login">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <public listen="127.0.0.1:6000" connectProcess=""/>
+            </process>
+        </processType>
+
+        <!--route，内网消息转发，目前支持一个路由，如果成为瓶颈，直接修改router支持多个即可-->
+        <processType name="router">
+            <process num="1">
+                <private listen="127.0.0.1:9000" connectProcess=""/>
+            </process>
+        </processType>
+
+        <!--网关，只负客户端责连接管理以及很少的逻辑，可扩展多个-->
+        <processType name="gateway">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <public  listen="0.0.0.0:6100"/>
+            </process>
+        </processType>
+
+        <!--func，独立功能，好友帮会排名等牵扯到全世界玩家的模块，只能有一个-->
+        <processType name="func">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+            </process>
+        </processType>
+
+        <!--数据库服，只用来备份数据，可扩展多个-->
+        <processType name="dbcached">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <dbwrite name="gamedb"/>
+            </process>
+        </processType>
+
+        <!--hallmanager，大厅管理，只有一个，当于mmo中的场景管理器-->
+        <processType name="hallmanager">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+            </process>
+        </processType>
+
+        <!--hall，大厅，可扩展多个-->
+        <processType name="hall">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+                <dbread name="gamedb"/>
+            </process>
+        </processType>
+
+        <!--gamemanager，游戏管理器，只有一个，负责向各类游戏中添加角色，不做其他事情-->
+        <processType name="gamemanager">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+            </process>
+        </processType>
+
+        <!--各类游戏服务器，可能多个游戏在一个服，也可能不同游戏不同服，但是一定要遵守manager统一格式-->
+        <processType name="game">
+            <process num="1">
+                <private listen="" connectProcess="router:1"/>
+            </process>
+        </processType>
+
+    </allProcesses>
+</root>
+

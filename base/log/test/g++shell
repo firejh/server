@@ -1,0 +1,1 @@
+ g++ main.cpp ../liblog.a ../../component/libcomponent.a  -lpthread -I ../../ -o main -std=c++11 -Wl,--no-as-needed
